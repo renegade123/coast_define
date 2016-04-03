@@ -256,8 +256,8 @@ PRO coastline::getline,inifile
   ;originImg=READ_tiff(self.infile)
   originImg=READ_TIFF('C:\Users\name\IDLWorkspace83\coastline\subset_VV.tif',R, G, B,GEOTIFF=GeoKeys,INTERLEAVE = 0)
   ;Img=TRANSPOSE(ROTATE(DOUBLE(REFORM(originImg[0,2000:2399,2000:2399])),1))
-  ;Img=TRANSPOSE(ROTATE(DOUBLE(REFORM(originImg[1,*,*])),1))
-  Img=DOUBLE(originImg)
+  Img=TRANSPOSE(ROTATE(DOUBLE(originImg),1))
+  ;Img=DOUBLE(originImg)
   HELP,IMG
   ;plot, transpose(img,[0,2,1])
   timestep=5;   time step
@@ -292,9 +292,9 @@ PRO coastline::getline,inifile
   ;im = IMAGE(originImg[*,2000:2399,2000:2399], RGB_TABLE=13, TITLE='Coastline')
   TileData = BYTSCL(originImg)
   ;self.ORIDATA = PTR_NEW(TileData,/no_Copy)
-  self.ORIDATA = PTR_NEW(TileData,/no_Copy)
-  ;self.CONDATA = PTR_NEW(TRANSPOSE(ROTATE(phi,1)),/no_Copy)
-  self.CONDATA = PTR_NEW(initialLSF,/no_Copy)
+  self.ORIDATA = PTR_NEW(TRANSPOSE(ROTATE(TileData,1)),/no_Copy)
+  self.CONDATA = PTR_NEW(TRANSPOSE(ROTATE(phi,1)),/no_Copy)
+  ;self.CONDATA = PTR_NEW(initialLSF,/no_Copy)
   idata = *(self.ORIDATA)
   cdata = *(self.CONDATA)
   self.OIMAGE.SETPROPERTY, data = idata
@@ -309,15 +309,17 @@ PRO coastline::getline,inifile
     IF potential EQ 2 THEN potentialFunction = 'double-well' ELSE potentialFunction = 'double-well'
   END
   FOR n=1,iter_outer DO BEGIN
+    tic
     phi=self.drlse_edge(phi, g, lambda, mu, alfa, epsilon, timestep, iter_inner, potentialFunction)
+    toc
     IF (n MOD 2) EQ 0 THEN BEGIN
       ;      c.erase
       ;      im = IMAGE(originImg[*,2000:2399,2000:2399], RGB_TABLE=13, TITLE='Coastline',/OVERPLOT)
       ;      ;im = IMAGE(originImg, RGB_TABLE=13, TITLE='Coastline',/OVERPLOT)
       ;      c = CONTOUR(TRANSPOSE(ROTATE(phi,1)), C_LINESTYLE=0,c_label_show=0,COLOR=[0,255,0] ,c_value=[0,0] ,/OVERPLOT)
-      ;self.CONDATA = PTR_NEW(TRANSPOSE(ROTATE(phi,1)),/no_Copy)
-     tempphi = phi
-      self.CONDATA = PTR_NEW(tempphi,/no_Copy)
+      self.CONDATA = PTR_NEW(TRANSPOSE(ROTATE(phi,1)),/no_Copy)
+     ;tempphi = phi
+      ;self.CONDATA = PTR_NEW(tempphi,/no_Copy)
       cdata = *(self.CONDATA)
       self.OCONTOUR.SETPROPERTY, hide =0,data = cdata
       self.OWINDOW.draw
